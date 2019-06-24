@@ -227,6 +227,7 @@ const Album = props => {
             </AppBar>
             <main>
                 <div className={classes.heroContent}>
+                    <span>Hello</span>
                     <Container maxWidth="xs">
                         <Typography
                             component="h1"
