@@ -87,6 +87,7 @@ const Album = props => {
     const [matrixSize, setMatrixSize] = useState(0);
     const [firstPlayerTurnType, setFirstPlayerTurnType] = useState("");
     const [playerFullName, setPlayerFullName] = useState("");
+    const [fullNameShorthand,setFullNameShorthand ] = useState("");
     const [playerFirstName, setPlayerFirstName] = useState("");
     const [playerLastName, setPlayerLastName] = useState("");
     const [userName, setUserName] = useState("");
@@ -99,11 +100,12 @@ const Album = props => {
         const fetchData = async () => {
             const response = await Axios.get("account/player", { headers });
             setPlayerFullName(response.data.fullName);
+            setFullNameShorthand(response.data.fullNameShorthand);
             setPlayerFirstName(response.data.lastName);
             setPlayerLastName(response.data.firstName);
             setEmail(response.data.email);
             setUserName(response.data.userName);
-            console.log("Player Response", response);
+            console.log("USER_RESPONSE", response);
         };
 
         fetchData();
@@ -143,6 +145,8 @@ const Album = props => {
             response = await Axios.put("/account", formData, {
                 headers: headers
             });
+            setPlayerFullName(response.data.fullName);
+            setFullNameShorthand(response.data.fullNameShorthand)
         } catch (err) {
             throw new Error(err.response.data);
         }
@@ -201,13 +205,6 @@ const Album = props => {
         setConnectClicked(false);
         setCreateClicked(!createClicked);
     };
-
-    let avatar = "";
-    if (playerFirstName.length > 0 && playerLastName.length > 0) {
-        avatar =
-            playerLastName.toUpperCase()[0] + playerFirstName.toUpperCase()[0];
-    }
-
     return (
         <React.Fragment>
             <CssBaseline />
@@ -227,7 +224,7 @@ const Album = props => {
                         className={classes.orangeAvatar}
                         onClick={handleClick}
                     >
-                        {avatar}
+                        {fullNameShorthand}
                     </Avatar>
                     <Menu
                         id="simple-menu"
