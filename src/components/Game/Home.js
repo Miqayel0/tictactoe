@@ -383,15 +383,29 @@ const Album = props => {
             {/* Footer */}
             <footer className={classes.footer}>
                 <Typography variant="h6" align="center" gutterBottom>
-                    About as
+                    About Us
+                </Typography>
+                <Typography component="p" variant="subtitle1" color="textSecondary" align="center" gutterBottom>
+                CEO Ani Barseghyan
                 </Typography>
                 <Typography
-                    variant="subtitle1"
+                    variant="subtitle2"
                     align="center"
                     color="textSecondary"
                     component="p"
                 >
-                    CEO Ani Barseghyan
+                    
+                    CTO Varsik Harutyunyan,
+                    PM Narek Aharonyan,
+                    Developer Miqayel Avagyan
+                </Typography>
+                <Typography
+                    variant="caption"
+                    align="center"
+                    color="textSecondary"
+                    component="p"
+                >
+                    © 2019 All Rights Reserved - Fancy | Terms of Use | Privacy Policy | Cookies Policy
                 </Typography>
             </footer>
             {/* End footer */}
