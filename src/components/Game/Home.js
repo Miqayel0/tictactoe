@@ -18,66 +18,66 @@ import Logo from "../../assets/img/tic_tac_toe-512.png";
 import EditUserPopup from "./UpdateUserPopup";
 
 const headers = {
-    Authorization: localStorage.getItem("accessToken"),
+    Authorization: localStorage.getItem("accessToken")
 };
 
 const useStyles = makeStyles(theme => ({
     toolbar: {
         display: "flex",
-        justifyContent: "space-between",
+        justifyContent: "space-between"
     },
     icon: {
-        marginRight: theme.spacing(2),
+        marginRight: theme.spacing(2)
     },
     heroContent: {
         backgroundColor: theme.palette.background.paper,
-        padding: theme.spacing(8, 0, 6),
+        padding: theme.spacing(8, 0, 6)
     },
     heroButtons: {
-        marginTop: theme.spacing(4),
+        marginTop: theme.spacing(4)
     },
     cardGrid: {
         paddingTop: theme.spacing(8),
-        paddingBottom: theme.spacing(8),
+        paddingBottom: theme.spacing(8)
     },
     card: {
         height: "100%",
         display: "flex",
-        flexDirection: "column",
+        flexDirection: "column"
     },
     cardMedia: {
-        paddingTop: "56.25%", // 16:9
+        paddingTop: "56.25%" // 16:9
     },
     cardContent: {
-        flexGrow: 1,
+        flexGrow: 1
     },
     picture: {
-        marginTop: theme.spacing(4),
+        marginTop: theme.spacing(4)
     },
     textField: {
         marginLeft: theme.spacing(1),
         marginRight: theme.spacing(1),
-        width: 300,
+        width: 300
     },
     dense: {
-        marginTop: 19,
+        marginTop: 19
     },
     submit: {
         width: "300px",
-        marginTop: theme.spacing(2),
+        marginTop: theme.spacing(2)
     },
     orangeAvatar: {
         margin: 10,
         color: "#fff",
-        backgroundColor: deepOrange[500],
+        backgroundColor: deepOrange[500]
     },
     account: {
-        marginBottom: theme.spacing(2),
+        marginBottom: theme.spacing(2)
     },
     footer: {
         backgroundColor: theme.palette.background.paper,
-        padding: theme.spacing(6),
-    },
+        padding: theme.spacing(6)
+    }
 }));
 
 const Album = props => {
@@ -88,7 +88,7 @@ const Album = props => {
     const [firstPlayerTurnType, setFirstPlayerTurnType] = useState("");
     const [playerFullName, setPlayerFullName] = useState("");
     const [playerFirstName, setPlayerFirstName] = useState("");
-    const [PlayerLastName, setPlayerLastName] = useState(""); 
+    const [playerLastName, setPlayerLastName] = useState("");
     const [userName, setUserName] = useState("");
     const [email, setEmail] = useState("");
     const [whosTurn, setWhosTurn] = useState("");
@@ -102,7 +102,7 @@ const Album = props => {
             setPlayerFirstName(response.data.lastName);
             setPlayerLastName(response.data.firstName);
             setEmail(response.data.email);
-            setUserName(response.data.userName)
+            setUserName(response.data.userName);
             console.log("Player Response", response);
         };
 
@@ -122,12 +122,35 @@ const Album = props => {
     };
 
     const handleClose = () => {
-        handleClickOpenPopup();
         setAnchorEl(null);
     };
 
+    const accountClickedHandler = () => {
+        handleClose();
+        handleClickOpenPopup();
+    };
+
+    const updateUserSubmitHandler = async () => {
+        let formData = new FormData();
+        let response = null;
+        formData.append("userName", userName);
+        formData.append("firstName", playerFirstName);
+        formData.append("lastName", playerLastName);
+        formData.append("email", email);
+
+        handleClosePopup();
+        try {
+            response = await Axios.put("/account", formData, {
+                headers: headers
+            });
+        } catch (err) {
+            throw new Error(err.response.data);
+        }
+        console.log("[UPDATE_USER_RESPONSE] ", response);
+    };
+
     const logout = () => {
-        setAnchorEl(null);
+        handleClose();
         localStorage.removeItem("accessToken");
         localStorage.removeItem("hubToken");
         props.history.push("/sign-in");
@@ -146,9 +169,9 @@ const Album = props => {
         formData.append("whosTurn", whosTurn);
 
         const response = await Axios.post("/game", formData, {
-            headers: headers,
+            headers: headers
         });
-        console.log("[CRATE RESPONSE] ", response);
+        console.log("[CREATE_GAME_RESPONSE] ", response);
 
         if (response.status === 200) {
             props.history.push("/play");
@@ -160,10 +183,10 @@ const Album = props => {
             let formData = new FormData();
             formData.append("gameId", event.target.value);
             let headers = {
-                Authorization: localStorage.getItem("accessToken"),
+                Authorization: localStorage.getItem("accessToken")
             };
             const response = await Axios.post("/game/attach-player", formData, {
-                headers: headers,
+                headers: headers
             });
             console.log("[response]", response);
         }
@@ -180,10 +203,9 @@ const Album = props => {
     };
 
     let avatar = "";
-    if (playerFirstName.length > 0 && PlayerLastName.length > 0) {
+    if (playerFirstName.length > 0 && playerLastName.length > 0) {
         avatar =
-            PlayerLastName.toUpperCase()[0] +
-            playerFirstName.toUpperCase()[0];
+            playerLastName.toUpperCase()[0] + playerFirstName.toUpperCase()[0];
     }
 
     return (
@@ -215,7 +237,7 @@ const Album = props => {
                         onClose={handleClose}
                     >
                         <MenuItem
-                            onClick={handleClose}
+                            onClick={accountClickedHandler}
                             className={classes.account}
                         >
                             {playerFullName}
@@ -287,7 +309,7 @@ const Album = props => {
                                     type="number"
                                     className={classes.textField}
                                     InputLabelProps={{
-                                        shrink: true,
+                                        shrink: true
                                     }}
                                     margin="normal"
                                     variant="outlined"
@@ -343,13 +365,19 @@ const Album = props => {
                         </div>
                     </Container>
                 </div>
-                <EditUserPopup 
-                    open={openPopup} 
+                <EditUserPopup
+                    open={openPopup}
+                    inputChangedHandler={inputChangedHandler}
                     handleClose={handleClosePopup}
                     email={email}
                     userName={userName}
                     firstName={playerFirstName}
-                    lastName={PlayerLastName} 
+                    lastName={playerLastName}
+                    setEmail={setEmail}
+                    setUserName={setUserName}
+                    setFirstName={setPlayerFirstName}
+                    setLastName={setPlayerLastName}
+                    handleSubmit={updateUserSubmitHandler}
                 />
             </main>
             {/* Footer */}

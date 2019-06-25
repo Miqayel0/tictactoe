@@ -25,7 +25,7 @@ class Chat extends Component {
         this.setState({ hubConnection }, () => {
             this.state.hubConnection
                 .start()
-                .then(() => console.log("Connection started!"))
+                .then(() => console.log("[SOCKET_CONNECTION] Connection started!"))
                 .catch(err =>
                     console.log("Error while establishing connection :( ", err)
                 );

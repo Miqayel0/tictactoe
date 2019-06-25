@@ -61,7 +61,7 @@ const SignIn = props => {
             return;
         }
 
-        console.log("[AUTH RESPONSE] ", response);
+        console.log("[AUTH_RESPONSE] ", response);
         setError("");
         localStorage.setItem(
             "accessToken",

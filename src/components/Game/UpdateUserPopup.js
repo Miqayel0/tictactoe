@@ -11,7 +11,7 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 const useStyles = makeStyles(theme => ({
     TextField: {
         marginBottom: theme.spacing(2)
-    },
+    }
 }));
 
 const FormDialog = props => {
@@ -36,7 +36,9 @@ const FormDialog = props => {
                         autoComplete="email"
                         value={props.email}
                         className={classes.TextField}
-                        //onChange={event => inputChangedHandler(event, setEmail)}
+                        onChange={event =>
+                            props.inputChangedHandler(event, props.setEmail)
+                        }
                     />
                     <TextField
                         autoComplete="fname"
@@ -48,9 +50,9 @@ const FormDialog = props => {
                         label="First Name"
                         value={props.firstName}
                         className={classes.TextField}
-                        // onChange={event =>
-                        //     inputChangedHandler(event, setFirstName)
-                        // }
+                        onChange={event =>
+                            props.inputChangedHandler(event, props.setFirstName)
+                        }
                     />
                     <TextField
                         //variant="outlined"
@@ -62,9 +64,9 @@ const FormDialog = props => {
                         autoComplete="lname"
                         value={props.lastName}
                         className={classes.TextField}
-                        // onChange={event =>
-                        //     inputChangedHandler(event, setLastName)
-                        // }
+                        onChange={event =>
+                            props.inputChangedHandler(event, props.setLastName)
+                        }
                     />
                     <TextField
                         //variant="outlined"
@@ -76,16 +78,20 @@ const FormDialog = props => {
                         autoComplete="userName"
                         value={props.userName}
                         className={classes.TextField}
-                        // onChange={event =>
-                        //     inputChangedHandler(event, setUserName)
-                        // }
+                        onChange={event =>
+                            props.inputChangedHandler(event, props.setUserName)
+                        }
                     />
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={props.handleClose} variant="outlined" color="primary">
+                    <Button
+                        onClick={props.handleClose}
+                        variant="outlined"
+                        color="primary"
+                    >
                         Cancel
                     </Button>
-                    <Button onClick={props.handleClose} color="secondary">
+                    <Button onClick={props.handleSubmit} color="secondary">
                         submit
                     </Button>
                 </DialogActions>
