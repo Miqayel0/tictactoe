@@ -36,21 +36,6 @@ const useStyles = makeStyles(theme => ({
     heroButtons: {
         marginTop: theme.spacing(4)
     },
-    cardGrid: {
-        paddingTop: theme.spacing(8),
-        paddingBottom: theme.spacing(8)
-    },
-    card: {
-        height: "100%",
-        display: "flex",
-        flexDirection: "column"
-    },
-    cardMedia: {
-        paddingTop: "56.25%" // 16:9
-    },
-    cardContent: {
-        flexGrow: 1
-    },
     picture: {
         marginTop: theme.spacing(4)
     },
@@ -87,7 +72,7 @@ const Album = props => {
     const [matrixSize, setMatrixSize] = useState(0);
     const [firstPlayerTurnType, setFirstPlayerTurnType] = useState("");
     const [playerFullName, setPlayerFullName] = useState("");
-    const [fullNameShorthand,setFullNameShorthand ] = useState("");
+    const [fullNameShorthand, setFullNameShorthand] = useState("");
     const [playerFirstName, setPlayerFirstName] = useState("");
     const [playerLastName, setPlayerLastName] = useState("");
     const [userName, setUserName] = useState("");
@@ -105,7 +90,7 @@ const Album = props => {
             setPlayerLastName(response.data.firstName);
             setEmail(response.data.email);
             setUserName(response.data.userName);
-            console.log("USER_RESPONSE", response);
+            console.log("[USER_RESPONSE]", response);
         };
 
         fetchData();
@@ -146,7 +131,7 @@ const Album = props => {
                 headers: headers
             });
             setPlayerFullName(response.data.fullName);
-            setFullNameShorthand(response.data.fullNameShorthand)
+            setFullNameShorthand(response.data.fullNameShorthand);
         } catch (err) {
             throw new Error(err.response.data);
         }
@@ -382,8 +367,14 @@ const Album = props => {
                 <Typography variant="h6" align="center" gutterBottom>
                     About Us
                 </Typography>
-                <Typography component="p" variant="subtitle1" color="textSecondary" align="center" gutterBottom>
-                CEO Ani Barseghyan
+                <Typography
+                    component="p"
+                    variant="subtitle1"
+                    color="textSecondary"
+                    align="center"
+                    gutterBottom
+                >
+                    CEO Ani Barseghyan
                 </Typography>
                 <Typography
                     variant="subtitle2"
@@ -391,10 +382,8 @@ const Album = props => {
                     color="textSecondary"
                     component="p"
                 >
-                    
-                    CTO Varsik Harutyunyan,
-                    PM Narek Aharonyan,
-                    Developer Miqayel Avagyan
+                    CTO Varsik Harutyunyan, PM Narek Aharonyan, Developer
+                    Miqayel Avagyan
                 </Typography>
                 <Typography
                     variant="caption"
@@ -402,7 +391,8 @@ const Album = props => {
                     color="textSecondary"
                     component="p"
                 >
-                    © 2019 All Rights Reserved - Fancy | Terms of Use | Privacy Policy | Cookies Policy
+                    © 2019 All Rights Reserved - Fancy | Terms of Use | Privacy
+                    Policy | Cookies Policy
                 </Typography>
             </footer>
             {/* End footer */}
