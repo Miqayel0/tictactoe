@@ -57,7 +57,7 @@ const SignIn = props => {
         try {
             response = await Axios.post("/auth", formData);
         } catch (err) {
-            setError(err.response.data);
+            setError(err.response && err.response.data || "");
             return;
         }
 

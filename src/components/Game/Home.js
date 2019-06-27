@@ -15,7 +15,7 @@ import { deepOrange } from "@material-ui/core/colors";
 import TextField from "@material-ui/core/TextField";
 import Axios from "../../Axios";
 import Logo from "../../assets/img/tic_tac_toe-512.png";
-import EditUserPopup from "./UpdateUserPopup";
+import EditUserPopup from "../User/UpdateUserPopup";
 
 const headers = {
     Authorization: localStorage.getItem("accessToken")
@@ -227,8 +227,22 @@ const Album = props => {
                         <MenuItem onClick={handleClose}>Games</MenuItem>
                         <MenuItem onClick={logout}>Logout</MenuItem>
                     </Menu>
-                </Toolbar>
+                </Toolbar>           
             </AppBar>
+            <EditUserPopup
+                    open={openPopup}
+                    inputChangedHandler={inputChangedHandler}
+                    handleClose={handleClosePopup}
+                    email={email}
+                    userName={userName}
+                    firstName={playerFirstName}
+                    lastName={playerLastName}
+                    setEmail={setEmail}
+                    setUserName={setUserName}
+                    setFirstName={setPlayerFirstName}
+                    setLastName={setPlayerLastName}
+                    handleSubmit={updateUserSubmitHandler}
+                /> 
             <main>
                 <div className={classes.heroContent}>
                     <Container maxWidth="xs">
@@ -347,22 +361,7 @@ const Album = props => {
                         </div>
                     </Container>
                 </div>
-                <EditUserPopup
-                    open={openPopup}
-                    inputChangedHandler={inputChangedHandler}
-                    handleClose={handleClosePopup}
-                    email={email}
-                    userName={userName}
-                    firstName={playerFirstName}
-                    lastName={playerLastName}
-                    setEmail={setEmail}
-                    setUserName={setUserName}
-                    setFirstName={setPlayerFirstName}
-                    setLastName={setPlayerLastName}
-                    handleSubmit={updateUserSubmitHandler}
-                />
             </main>
-            {/* Footer */}
             <footer className={classes.footer}>
                 <Typography variant="h6" align="center" gutterBottom>
                     About Us
@@ -395,7 +394,6 @@ const Album = props => {
                     Policy | Cookies Policy
                 </Typography>
             </footer>
-            {/* End footer */}
         </React.Fragment>
     );
 };
