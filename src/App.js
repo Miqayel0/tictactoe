@@ -14,9 +14,9 @@ const App = props => {
         function checkOut() {
             const token = localStorage.getItem("accessToken");
             if (token) {
-                setIsAuth(true);
+                !isAuth && setIsAuth(true);
             } else {
-                !isAuth && setIsAuth(false);
+                isAuth && setIsAuth(false);
             }
         }
         checkOut();
