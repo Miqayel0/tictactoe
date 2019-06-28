@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { HubConnectionBuilder, HttpTransportType } from "@aspnet/signalr";
+import { HubConnectionBuilder } from "@aspnet/signalr";
 
 const token = localStorage.getItem("hubToken");
 

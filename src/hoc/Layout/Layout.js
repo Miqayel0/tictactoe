@@ -13,36 +13,32 @@ import Logo from "../../assets/img/tic_tac_toe-512.png";
 import EditUserPopup from "../../components/User/UpdateUserPopup";
 import { withRouter } from "react-router";
 
-const headers = {
-    Authorization: localStorage.getItem("accessToken"),
-};
-
 const useStyles = makeStyles(theme => ({
     toolbar: {
         display: "flex",
-        justifyContent: "space-between",
+        justifyContent: "space-between"
     },
     textField: {
         marginLeft: theme.spacing(1),
         marginRight: theme.spacing(1),
-        width: 300,
+        width: 300
     },
     submit: {
         width: "300px",
-        marginTop: theme.spacing(2),
+        marginTop: theme.spacing(2)
     },
     orangeAvatar: {
         margin: 10,
         color: "#fff",
-        backgroundColor: deepOrange[500],
+        backgroundColor: deepOrange[500]
     },
     account: {
-        marginBottom: theme.spacing(2),
+        marginBottom: theme.spacing(2)
     },
     footer: {
         backgroundColor: theme.palette.background.paper,
-        padding: theme.spacing(6),
-    },
+        padding: theme.spacing(6)
+    }
 }));
 
 const Layout = props => {
@@ -58,7 +54,9 @@ const Layout = props => {
 
     useEffect(() => {
         const fetchData = async () => {
-            const response = await Axios.get("account/player", { headers });
+            const response = await Axios.get("account/player", {
+                headers: { Authorization: localStorage.getItem("accessToken") }
+            });
             setPlayerFullName(response.data.fullName);
             setFullNameShorthand(response.data.fullNameShorthand);
             setPlayerFirstName(response.data.lastName);
@@ -68,7 +66,7 @@ const Layout = props => {
             console.log("[USER_RESPONSE]", response);
         };
 
-        fetchData();
+        fetchData().catch(err => err);
     }, []);
 
     function handleClickOpenPopup() {
@@ -103,7 +101,7 @@ const Layout = props => {
         handleClosePopup();
         try {
             response = await Axios.put("/account", formData, {
-                headers: headers,
+                headers: { Authorization: localStorage.getItem("accessToken") }
             });
             setPlayerFullName(response.data.fullName);
             setFullNameShorthand(response.data.fullNameShorthand);
@@ -117,7 +115,7 @@ const Layout = props => {
         handleClose();
         localStorage.removeItem("accessToken");
         localStorage.removeItem("hubToken");
-        props.history.push("/sign-in");
+        props.setAuth(false);
     };
 
     const inputChangedHandler = (event, callBack) => {

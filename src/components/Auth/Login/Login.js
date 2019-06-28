@@ -48,7 +48,7 @@ const SignIn = props => {
         callBack(event.target.value);
     };
 
-    const submitHandler = async event => {
+    const loginSubmitHandler = async event => {
         event.preventDefault();
         let response = null;
         let formData = new FormData(); //formdata object
@@ -57,7 +57,7 @@ const SignIn = props => {
         try {
             response = await Axios.post("/auth", formData);
         } catch (err) {
-            setError(err.response && err.response.data || "");
+            setError((err.response && err.response.data) || "");
             return;
         }
 
@@ -68,7 +68,7 @@ const SignIn = props => {
             `Bearer ${response.data.accessToken.authToken}`
         );
         localStorage.setItem("hubToken", response.data.accessToken.authToken);
-        props.history.push("/home");
+        props.setAuth(true);
     };
 
     return (
@@ -122,7 +122,7 @@ const SignIn = props => {
                         fullWidth
                         variant="contained"
                         color="primary"
-                        onClick={submitHandler}
+                        onClick={loginSubmitHandler}
                         className={classes.submit}
                     >
                         Sign In
