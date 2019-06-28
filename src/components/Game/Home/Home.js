@@ -11,10 +11,6 @@ import TextField from "@material-ui/core/TextField";
 import Axios from "../../../Axios";
 import Logo from "../../../assets/img/tic_tac_toe-512.png";
 
-const headers = {
-    Authorization: localStorage.getItem("accessToken")
-};
-
 const useStyles = makeStyles(theme => ({
     toolbar: {
         display: "flex",
@@ -79,9 +75,7 @@ const Home = props => {
         formData.append("firstPlayerTurnType", firstPlayerTurnType);
         formData.append("whosTurn", whosTurn);
 
-        const response = await Axios.post("/game", formData, {
-            headers: headers
-        });
+        const response = await createGame(formData);
         console.log("[CREATE_GAME_RESPONSE] ", response);
 
         if (response.status === 200) {
@@ -93,14 +87,43 @@ const Home = props => {
         if (event.keyCode == 13) {
             let formData = new FormData();
             formData.append("gameId", event.target.value);
-            let headers = {
-                Authorization: localStorage.getItem("accessToken")
-            };
-            const response = await Axios.post("/game/attach-player", formData, {
-                headers: headers
-            });
+
+            let response = await connectToGame();
             console.log("[response]", response);
         }
+    };
+
+    const createGame = async formData => {
+        const headers = {
+            Authorization: localStorage.getItem("accessToken")
+        };
+        let response = null;
+
+        try {
+            response = await Axios.post("/game", formData, {
+                headers: headers
+            });
+        } catch (err) {
+            return err.response;
+        }
+
+        return response;
+    };
+
+    const connectToGame = async formData => {
+        let headers = {
+            Authorization: localStorage.getItem("accessToken")
+        };
+        let response = null;
+        try {
+            response = await Axios.post("/game/attach-player", formData, {
+                headers: headers
+            });
+        } catch (err) {
+            return err.response;
+        }
+
+        return response;
     };
 
     const connectChangedHandler = () => {
@@ -115,123 +138,117 @@ const Home = props => {
     return (
         <React.Fragment>
             <CssBaseline />
-                <div className={classes.heroContent}>
-                    <Container maxWidth="xs">
-                        <Typography
-                            component="h1"
-                            variant="h2"
-                            align="center"
-                            color="textPrimary"
-                            gutterBottom
-                        >
-                            TicTacToe
-                        </Typography>
-                        <div className={classes.heroButtons}>
-                            <Grid container spacing={2} justify="center">
-                                <Grid item>
-                                    <Button
-                                        variant="contained"
-                                        color="primary"
-                                        onClick={createChangedHandler}
-                                    >
-                                        new game
-                                    </Button>
-                                </Grid>
-                                <Grid item>
-                                    <Button
-                                        variant="outlined"
-                                        color="primary"
-                                        onClick={connectChangedHandler}
-                                    >
-                                        connect to game
-                                    </Button>
-                                </Grid>
+            <div className={classes.heroContent}>
+                <Container maxWidth="xs">
+                    <Typography
+                        component="h1"
+                        variant="h2"
+                        align="center"
+                        color="textPrimary"
+                        gutterBottom
+                    >
+                        TicTacToe
+                    </Typography>
+                    <div className={classes.heroButtons}>
+                        <Grid container spacing={2} justify="center">
+                            <Grid item>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={createChangedHandler}
+                                >
+                                    new game
+                                </Button>
                             </Grid>
-                        </div>
-                        {connectClicked && (
+                            <Grid item>
+                                <Button
+                                    variant="outlined"
+                                    color="primary"
+                                    onClick={connectChangedHandler}
+                                >
+                                    connect to game
+                                </Button>
+                            </Grid>
+                        </Grid>
+                    </div>
+                    {connectClicked && (
+                        <TextField
+                            id="standard-dense"
+                            label="Game ID"
+                            className={clsx(classes.textField, classes.dense)}
+                            margin="dense"
+                            onKeyDown={keyPress}
+                        />
+                    )}
+
+                    {createClicked && (
+                        <form noValidate>
                             <TextField
-                                id="standard-dense"
-                                label="Game ID"
+                                id="outlined-number"
+                                label="Matrix Size"
+                                value={matrixSize}
+                                onChange={event =>
+                                    inputChangedHandler(event, setMatrixSize)
+                                }
+                                type="number"
+                                className={classes.textField}
+                                InputLabelProps={{
+                                    shrink: true
+                                }}
+                                margin="normal"
+                                variant="outlined"
+                            />
+                            <TextField
+                                id="outlined-dense"
+                                label="Your turn type (X, Y)"
                                 className={clsx(
                                     classes.textField,
                                     classes.dense
                                 )}
+                                onChange={event =>
+                                    inputChangedHandler(
+                                        event,
+                                        setFirstPlayerTurnType
+                                    )
+                                }
                                 margin="dense"
-                                onKeyDown={keyPress}
+                                variant="outlined"
                             />
-                        )}
-
-                        {createClicked && (
-                            <form noValidate>
-                                <TextField
-                                    id="outlined-number"
-                                    label="Matrix Size"
-                                    value={matrixSize}
-                                    onChange={event =>
-                                        inputChangedHandler(
-                                            event,
-                                            setMatrixSize
-                                        )
-                                    }
-                                    type="number"
-                                    className={classes.textField}
-                                    InputLabelProps={{
-                                        shrink: true
-                                    }}
-                                    margin="normal"
-                                    variant="outlined"
-                                />
-                                <TextField
-                                    id="outlined-dense"
-                                    label="Your turn type (X, Y)"
-                                    className={clsx(
-                                        classes.textField,
-                                        classes.dense
-                                    )}
-                                    onChange={event =>
-                                        inputChangedHandler(
-                                            event,
-                                            setFirstPlayerTurnType
-                                        )
-                                    }
-                                    margin="dense"
-                                    variant="outlined"
-                                />
-                                <TextField
-                                    id="outlined-dense"
-                                    label="Whos Turn (1, 2)"
-                                    className={clsx(
-                                        classes.textField,
-                                        classes.dense
-                                    )}
-                                    onChange={event =>
-                                        inputChangedHandler(event, setWhosTurn)
-                                    }
-                                    margin="dense"
-                                    variant="outlined"
-                                />
-                                <Button
-                                    type="submit"
-                                    fullWidth
-                                    variant="contained"
-                                    color="primary"
-                                    onClick={submitHandler}
-                                    className={classes.submit}
-                                >
-                                    Submit
-                                </Button>
-                            </form>
-                        )}
-                        <div className={classes.picture}>
-                            <img
-                                src={Logo}
-                                width="400"
-                                height="350"
-                                alt="background"
+                            <TextField
+                                id="outlined-dense"
+                                label="Whos Turn (1, 2)"
+                                className={clsx(
+                                    classes.textField,
+                                    classes.dense
+                                )}
+                                onChange={event =>
+                                    inputChangedHandler(event, setWhosTurn)
+                                }
+                                margin="dense"
+                                variant="outlined"
                             />
-                        </div>
-                    </Container>
-                </div>
+                            <Button
+                                type="submit"
+                                fullWidth
+                                variant="contained"
+                                color="primary"
+                                onClick={submitHandler}
+                                className={classes.submit}
+                            >
+                                Submit
+                            </Button>
+                        </form>
+                    )}
+                    <div className={classes.picture}>
+                        <img
+                            src={Logo}
+                            width="400"
+                            height="350"
+                            alt="background"
+                        />
+                    </div>
+                </Container>
+            </div>
         </React.Fragment>
     );
 };
