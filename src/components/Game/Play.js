@@ -25,7 +25,9 @@ class Chat extends Component {
         this.setState({ hubConnection }, () => {
             this.state.hubConnection
                 .start()
-                .then(() => console.log("[SOCKET_CONNECTION] Connection started!"))
+                .then(() =>
+                    console.log("[SOCKET_CONNECTION] Connection started!")
+                )
                 .catch(err =>
                     console.log("Error while establishing connection :( ", err)
                 );
@@ -54,9 +56,11 @@ class Chat extends Component {
     };
 
     render() {
+        console.log("[PLAY_PROPS]",this.props);
+        const { match: { params } } = this.props;
         return (
-            <div>
-                <br />
+            <div style={{margin: '50px'}}>
+                <span style={{margin: '50px'}} >{params.gameId}</span>
                 <input
                     type="text"
                     value={this.state.message}

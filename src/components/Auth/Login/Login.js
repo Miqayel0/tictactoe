@@ -50,25 +50,38 @@ const SignIn = props => {
 
     const loginSubmitHandler = async event => {
         event.preventDefault();
-        let response = null;
-        let formData = new FormData(); //formdata object
-        formData.append("userName", userName); //append the values with key, value pair
+        setError("");
+
+        let formData = new FormData();
+        formData.append("userName", userName);
         formData.append("password", password);
+
+        const response = await login(formData);
+        if (response.status === 200) {
+            localStorage.setItem(
+                "accessToken",
+                `Bearer ${response.data.accessToken.authToken}`
+            );
+            localStorage.setItem(
+                "hubToken",
+                response.data.accessToken.authToken
+            );
+            props.setAuth(true);
+        } else {
+            setError(response.data);
+        }
+        console.log("[AUTH_RESPONSE] ", response);
+    };
+
+    const login = async formData => {
+        let response = null;
         try {
             response = await Axios.post("/auth", formData);
         } catch (err) {
-            setError((err.response && err.response.data) || "");
-            return;
+            return err.response;
         }
 
-        console.log("[AUTH_RESPONSE] ", response);
-        setError("");
-        localStorage.setItem(
-            "accessToken",
-            `Bearer ${response.data.accessToken.authToken}`
-        );
-        localStorage.setItem("hubToken", response.data.accessToken.authToken);
-        props.setAuth(true);
+        return response;
     };
 
     return (

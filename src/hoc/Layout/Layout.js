@@ -16,29 +16,29 @@ import { withRouter } from "react-router";
 const useStyles = makeStyles(theme => ({
     toolbar: {
         display: "flex",
-        justifyContent: "space-between"
+        justifyContent: "space-between",
     },
     textField: {
         marginLeft: theme.spacing(1),
         marginRight: theme.spacing(1),
-        width: 300
+        width: 300,
     },
     submit: {
         width: "300px",
-        marginTop: theme.spacing(2)
+        marginTop: theme.spacing(2),
     },
     orangeAvatar: {
         margin: 10,
         color: "#fff",
-        backgroundColor: deepOrange[500]
+        backgroundColor: deepOrange[500],
     },
     account: {
-        marginBottom: theme.spacing(2)
+        marginBottom: theme.spacing(2),
     },
     footer: {
         backgroundColor: theme.palette.background.paper,
-        padding: theme.spacing(6)
-    }
+        padding: theme.spacing(6),
+    },
 }));
 
 const Layout = props => {
@@ -55,7 +55,7 @@ const Layout = props => {
     useEffect(() => {
         const fetchData = async () => {
             const response = await Axios.get("account/player", {
-                headers: { Authorization: localStorage.getItem("accessToken") }
+                headers: { Authorization: localStorage.getItem("accessToken") },
             });
             setPlayerFullName(response.data.fullName);
             setFullNameShorthand(response.data.fullNameShorthand);
@@ -91,31 +91,46 @@ const Layout = props => {
     };
 
     const updateUserSubmitHandler = async () => {
+        handleClosePopup();
+
         let formData = new FormData();
-        let response = null;
         formData.append("userName", userName);
         formData.append("firstName", playerFirstName);
         formData.append("lastName", playerLastName);
         formData.append("email", email);
 
-        handleClosePopup();
-        try {
-            response = await Axios.put("/account", formData, {
-                headers: { Authorization: localStorage.getItem("accessToken") }
-            });
+        let response = await updateUser(formData);
+        if (response.status === 200) {
             setPlayerFullName(response.data.fullName);
             setFullNameShorthand(response.data.fullNameShorthand);
-        } catch (err) {
-            throw new Error(err.response.data);
         }
+
         console.log("[UPDATE_USER_RESPONSE] ", response);
     };
 
+    const updateUser = async formData => {
+        const headers = { Authorization: localStorage.getItem("accessToken") };
+        let response = null;
+        try {
+            response = await Axios.put("/account", formData, {
+                headers: headers,
+            });
+        } catch (err) {
+            response = err.response;
+        }
+
+        return response;
+    };
     const logout = () => {
         handleClose();
         localStorage.removeItem("accessToken");
         localStorage.removeItem("hubToken");
         props.setAuth(false);
+    };
+
+    const gamesClickedHandler = () => {
+        handleClose();
+        props.history.push("/game-history");
     };
 
     const inputChangedHandler = (event, callBack) => {
@@ -156,7 +171,7 @@ const Layout = props => {
                         >
                             {playerFullName}
                         </MenuItem>
-                        <MenuItem onClick={handleClose}>Games</MenuItem>
+                        <MenuItem onClick={gamesClickedHandler}>Games</MenuItem>
                         <MenuItem onClick={logout}>Logout</MenuItem>
                     </Menu>
                 </Toolbar>
