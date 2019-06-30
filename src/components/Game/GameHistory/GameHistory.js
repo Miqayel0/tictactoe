@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
@@ -7,6 +7,7 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Link from "@material-ui/core/Link";
 import Paper from "@material-ui/core/Paper";
+import Axios from "../../../Axios";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -21,28 +22,41 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
-function createData(name, calories, fatt) {
-    let current_datetime = new Date();
-    let fat =
-        current_datetime.getDate() +
+function formatDate(date) {
+    let current_datetime = new Date(date);
+    let formatted_date =
+        current_datetime.getFullYear() +
         "-" +
         (current_datetime.getMonth() + 1) +
         "-" +
-        current_datetime.getFullYear();
-    console.log(fat);
-    return { name, calories, fat };
+        current_datetime.getDate() +
+        " " +
+        current_datetime.getHours() +
+        ":" +
+        current_datetime.getMinutes() +
+        ":" +
+        current_datetime.getSeconds();
+    return formatted_date;
 }
-
-const rows = [
-    createData("Frozen yoghurt", "Win", 23),
-    createData("Ice cream sandwich", "Win", 9.0),
-    createData("Eclair", "lose", 16.0),
-    createData("Cupcake", "Win", 3.7),
-    createData("Gingerbread", "lose", 16.0),
-];
 
 const SimpleTable = props => {
     const classes = useStyles();
+    const [scores, setScores] = useState([]);
+
+    useEffect(() => {
+        const getScores = async () => {
+            const headers = {
+                Authorization: localStorage.getItem("accessToken"),
+            };
+            const response = await Axios.get("/score", {
+                headers: headers,
+            });
+            setScores(response.data.scoreHistory);
+            console.log("[SCORE_RESPONSE]", response);
+        };
+
+        getScores().catch(err => err);
+    }, []);
 
     return (
         <Paper className={classes.root}>
@@ -55,15 +69,13 @@ const SimpleTable = props => {
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {rows.map(row => (
-                        <TableRow key={row.name}>
+                    {scores.map((score, index) => (
+                        <TableRow key={index}>
                             <TableCell component="th" scope="row">
-                                <Link href={""}>
-                                {row.name}
-                                </Link>
+                                <Link href={""}>{score.secondPlayerName}</Link>
                             </TableCell>
-                            <TableCell>{row.calories}</TableCell>
-                            <TableCell>{row.fat}</TableCell>
+                            <TableCell>{score.result}</TableCell>
+                            <TableCell>{formatDate(score.date)}</TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
