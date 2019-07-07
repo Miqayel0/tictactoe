@@ -85,12 +85,15 @@ const Home = props => {
     };
 
     const keyPress = async event => {
-        if (event.keyCode == 13) {
+        if (event.keyCode === 13) {
             let formData = new FormData();
             formData.append("gameId", event.target.value);
 
-            let response = await connectToGame();
+            let response = await connectToGame(formData);
             console.log("[response]", response);
+            if (response.status === 200) {
+                props.history.push(`/play/${response.data.gameId}`);
+            }
         }
     };
 
@@ -150,6 +153,17 @@ const Home = props => {
                     >
                         TicTacToe
                     </Typography>
+                    {props.gameId && (
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() =>
+                                props.history.push(`play${props.gameId}`)
+                            }
+                        >
+                            Connect To Game
+                        </Button>
+                    )}
                     <div className={classes.heroButtons}>
                         <Grid container spacing={2} justify="center">
                             <Grid item>
@@ -178,7 +192,7 @@ const Home = props => {
                             label="Game ID"
                             className={clsx(classes.textField, classes.dense)}
                             margin="dense"
-                            onKeyDown={keyPress}
+                            onKeyDown={event => keyPress(event)}
                         />
                     )}
 

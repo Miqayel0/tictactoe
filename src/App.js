@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Route, Switch, withRouter, Redirect } from "react-router-dom";
 import Login from "./components/Auth/Login/Login";
 import Register from "./components/Auth/Register/Register";
-import Game from "./components/Game/Play";
+import Game from "./components/Game/PlayGame/GameContiner";
 import GameHostory from "./components/Game/GameHistory/GameHistory";
 import Home from "./components/Game/HomePage/Home";
 import Layout from "../src/hoc/Layout/Layout";
@@ -10,7 +10,7 @@ import "./App.css";
 
 const App = props => {
     const [isAuth, setIsAuth] = useState(false);
-    const [gameId, setGameId] = useState("");
+    const [gameId, setGameId] = useState(null);
 
     // useEffect(() => {
     //     function checkOut() {
@@ -58,7 +58,7 @@ const App = props => {
                         path="/home"
                         exact
                         render={props => (
-                            <Home {...props} setGameId={setGameId} />
+                            <Home {...props} setGameId={setGameId} gameId={gameId} />
                         )}
                     />
                     <Route path="/game-history" exact component={GameHostory} />
