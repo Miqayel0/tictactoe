@@ -25,7 +25,7 @@ class Game extends Component {
     };
 
     get gameId() {
-      const {
+        const {
             match: { params },
         } = this.props;
 
@@ -33,7 +33,7 @@ class Game extends Component {
     }
 
     get userId() {
-        return localStorage.getItem("userId") || null; 
+        return localStorage.getItem("userId") || null;
     }
 
     componentDidMount = async () => {
@@ -45,7 +45,12 @@ class Game extends Component {
         }
         console.log("[GAME_DID_MOUNT_GAMEID]", response.data);
 
-        const { matrixSize, firstPlayerId, firstPlayerTurn, moves} = response.data;
+        const {
+            matrixSize,
+            firstPlayerId,
+            firstPlayerTurn,
+            moves,
+        } = response.data;
 
         let board = Array(matrixSize)
             .fill(0)
@@ -58,7 +63,7 @@ class Game extends Component {
             turn = firstPlayerTurn;
             currentPlayer = 1;
         } else {
-            currentPlayer  = 2;
+            currentPlayer = 2;
             switch (firstPlayerTurn) {
                 case 1:
                     turn = 2;
@@ -69,7 +74,7 @@ class Game extends Component {
             }
         }
 
-        moves.forEach(m => board[m.row][m.column] = m.player);
+        moves.forEach(m => (board[m.row][m.column] = m.player));
 
         const hubConnection = new HubConnectionBuilder()
             .withUrl("https://localhost:5001/play", {
@@ -84,15 +89,15 @@ class Game extends Component {
                     console.log("[SOCKET_CONNECTION] Connection started!")
                 )
                 .catch(err =>
-                    console.log("[SOCKET_CONNECTION] Error while establishing connection :( ", err)
+                    console.log(
+                        "[SOCKET_CONNECTION] Error while establishing connection :( ",
+                        err
+                    )
                 );
 
-            this.state.hubConnection.on(
-                "sendToPlayer",
-                (turn, row,col) => {
-                    this.movePlayer(turn, row, col);
-                }
-            );
+            this.state.hubConnection.on("sendToPlayer", (turn, row, col) => {
+                this.movePlayer(turn, row, col);
+            });
         });
     };
 
@@ -225,7 +230,7 @@ class Game extends Component {
     handleDialogClose = () => {
         // close the dialog
         this.setState({ showDialog: false });
-    }
+    };
 
     render() {
         const { showDialog, board, turn, gameover, winner } = this.state;

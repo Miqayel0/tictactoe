@@ -60,7 +60,7 @@ const Home = props => {
     const [connectClicked, setConnectClicked] = useState(false);
     const [createClicked, setCreateClicked] = useState(false);
     const [matrixSize, setMatrixSize] = useState(0);
-    const [firstPlayerTurnType, setFirstPlayerTurnType] = useState("");
+    const [firstPlayerTurn, setFirstPlayerTurn] = useState(0);
     // const [whosTurn, setWhosTurn] = useState("");
 
     const inputChangedHandler = (event, callBack) => {
@@ -72,7 +72,7 @@ const Home = props => {
 
         let formData = new FormData();
         formData.append("matrixSize", matrixSize);
-        formData.append("firstPlayerTurnType", firstPlayerTurnType);
+        formData.append("firstPlayerTurn", firstPlayerTurn);
         //formData.append("whosTurn", whosTurn);
 
         const response = await createGame(formData);
@@ -215,7 +215,7 @@ const Home = props => {
                             />
                             <TextField
                                 id="outlined-dense"
-                                label="Your turn type (X, Y)"
+                                label="Your turn (1 - X, 2 - 0)"
                                 className={clsx(
                                     classes.textField,
                                     classes.dense
@@ -223,7 +223,7 @@ const Home = props => {
                                 onChange={event =>
                                     inputChangedHandler(
                                         event,
-                                        setFirstPlayerTurnType
+                                        setFirstPlayerTurn
                                     )
                                 }
                                 margin="dense"
