@@ -66,6 +66,10 @@ const SignIn = props => {
                 "hubToken",
                 response.data.accessToken.authToken
             );
+            localStorage.setItem(
+                "userId",
+                response.data.id
+            );
             props.setAuth(true);
         } else {
             setError(response.data);

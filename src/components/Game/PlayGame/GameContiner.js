@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import { HubConnectionBuilder } from "@aspnet/signalr";
-import Grid from "@material-ui/core/Grid";
 import { withRouter } from "react-router";
 import Axios from "../../../Axios";
 import Board from "./components/Board.js";
@@ -18,27 +17,59 @@ class Game extends Component {
         board: [[]],
         gameover: false,
         winner: -1,
-        player: 1,
+        turn: null,
         hasWinner: false,
+        row: null,
+        col: null,
+        currentPlayer: null,
     };
 
-    componentDidMount = async () => {
-        const hubToken = localStorage.getItem("hubToken");
-        const {
+    get gameId() {
+      const {
             match: { params },
         } = this.props;
 
-        let response = await this.getGameById(params.gameId);
+        return params.gameId || null;
+    }
+
+    get userId() {
+        return localStorage.getItem("userId") || null; 
+    }
+
+    componentDidMount = async () => {
+        const hubToken = localStorage.getItem("hubToken");
+        let response = await this.getGameById(this.gameId);
 
         if (response.status !== 200) {
             return new Error(response.data);
         }
-
         console.log("[GAME_DID_MOUNT_GAMEID]", response.data);
-        let matrixSize = response.data.matrixSize;
+
+        const { matrixSize, firstPlayerId, firstPlayerTurn, moves} = response.data;
+
         let board = Array(matrixSize)
             .fill(0)
             .map(() => Array(matrixSize).fill(0));
+
+        let turn = null;
+        let currentPlayer = null;
+
+        if (this.userId === firstPlayerId) {
+            turn = firstPlayerTurn;
+            currentPlayer = 1;
+        } else {
+            currentPlayer  = 2;
+            switch (firstPlayerTurn) {
+                case 1:
+                    turn = 2;
+                    break;
+                case 2:
+                    turn = 1;
+                    break;
+            }
+        }
+
+        moves.forEach(m => board[m.row][m.column] = m.player);
 
         const hubConnection = new HubConnectionBuilder()
             .withUrl("https://localhost:5001/play", {
@@ -46,22 +77,20 @@ class Game extends Component {
             })
             .build();
 
-        this.setState({ hubConnection, board }, () => {
+        this.setState({ hubConnection, board, turn, currentPlayer }, () => {
             this.state.hubConnection
                 .start()
                 .then(() =>
                     console.log("[SOCKET_CONNECTION] Connection started!")
                 )
                 .catch(err =>
-                    console.log("Error while establishing connection :( ", err)
+                    console.log("[SOCKET_CONNECTION] Error while establishing connection :( ", err)
                 );
 
             this.state.hubConnection.on(
-                "sendToAll",
-                (nick, receivedMessage) => {
-                    const text = `${nick}: ${receivedMessage}`;
-                    const messages = this.state.messages.concat([text]);
-                    this.setState({ messages });
+                "sendToPlayer",
+                (turn, row,col) => {
+                    this.movePlayer(turn, row, col);
                 }
             );
         });
@@ -84,60 +113,54 @@ class Game extends Component {
         return response;
     };
 
-    sendMessage = () => {
+    notifyMove = (gameId, turn, row, col, currentPlayer) => {
         this.state.hubConnection
-            .invoke(
-                "sendToAll",
-                "e730e3ac-8978-43df-b4b9-87edae9a40fa",
-                this.state.message
-            )
+            .invoke("getMove", gameId, turn, row, col, currentPlayer)
             .catch(err => console.error(err));
-
-        this.setState({ message: "" });
     };
 
     newGame = () => {
         this.setState({ gameover: false });
     };
 
-    switchPlayer = player => {
-        this.setState({ player });
-    };
+    /*     switchPlayer = turn => {
+        this.setState({ turn });
+    }; */
 
     gameover = () => {
         this.setState({ gameover: true });
     };
 
-    winner = player => {
-        this.setState({ winner: player });
+    winner = turn => {
+        this.setState({ winner: turn });
     };
 
     /**
-     * When a player plays a turn we need to mark that spot on the board.  We then need to
-     * switch to the next player
-     * @param {number} player The current player
+     * When a turn plays a turn we need to mark that spot on the board.  We then need to
+     * switch to the next turn
+     * @param {number} turn The current turn
      * @param {number} row The row on the board
      * @param {number} col The column on the board
      */
 
-    movePlayer = (player, row, col) => {
-        console.log("[PLAYER]", player);
-        const updated = [...this.state.board];
+    movePlayer = (turn, row, col) => {
+        console.log("[PLAYER]", turn);
+        const updatedBoard = [...this.state.board]; // cloning board
+        updatedBoard[row][col] = turn;
 
-        updated[row][col] = player;
-        this.setState({ board: updated });
+        this.setState({ board: updatedBoard });
     };
 
-    checkWinner = (board, player) => {
-        // the logic to check if a player has won or the game ended in a draw are in
+    checkWinner = (board, turn) => {
+        // the logic to check if a turn has won or the game ended in a draw are in
         // the utils/game.js file.
 
         // instead of returning a promise like we would if we were making an api call
         // from our operations, we just return a boolean for the game winner
         let hasWinner = true;
 
-        if (isWinner(board, player)) {
-            this.winner(player);
+        if (isWinner(board, turn)) {
+            this.winner(turn);
             this.gameover();
         } else if (isDraw(board)) {
             this.winner(0);
@@ -149,10 +172,10 @@ class Game extends Component {
         this.setState({ hasWinner });
     };
 
-    playTurn = (player, row, col) => {
+    /*     playTurn = (turn, row, col) => {
         let nextPlayer;
 
-        switch (player) {
+        switch (turn) {
             case 1:
                 nextPlayer = 2;
                 break;
@@ -164,26 +187,25 @@ class Game extends Component {
                 break;
         }
 
-        this.movePlayer(player, row, col);
+        this.movePlayer(turn, row, col);
         this.switchPlayer(nextPlayer);
-    };
+    }; */
 
     handleBoardOnMove = square => {
-        // when a square is clicked we want to mark that square for the current player
+        // when a square is clicked we want to mark that square for the current turn
 
-        const { board, player, gameover } = this.state;
+        const { board, turn, gameover, currentPlayer } = this.state;
         const { row, col } = square;
-
         // only mark if the game is still in progress and the square is empty (none)
         // otherwise, ignore the play
         if (gameover || board[row][col] !== 0) {
             return;
         }
+        // make a play for the turn
+        this.movePlayer(turn, row, col);
+        this.notifyMove(this.gameId, turn, row, col, currentPlayer);
 
-        console.log("PLAYER handleBoardOnMove", player);
-        // make a play for the player
-        this.playTurn(player, row, col);
-        // then check for a winner
+        // then check for the winner
 
         if (this.state.hasWinner) {
             this.setState({ showDialog: true });
@@ -191,7 +213,7 @@ class Game extends Component {
     };
 
     handleDialogClick = answer => {
-        // we only want to start a new game if the player clicks 'yes'
+        // we only want to start a new game if the turn clicks 'yes'
         if (answer) {
             this.newGame();
         }
@@ -200,13 +222,13 @@ class Game extends Component {
         this.setState({ showDialog: false });
     };
 
-    handleDialogClose() {
+    handleDialogClose = () => {
         // close the dialog
         this.setState({ showDialog: false });
     }
 
     render() {
-        const { showDialog, board, player, gameover, winner } = this.state;
+        const { showDialog, board, turn, gameover, winner } = this.state;
         const draw = winner === 0;
 
         return (
@@ -216,7 +238,7 @@ class Game extends Component {
             // https://material-ui-next.com/layout/grid/
             <div style={{ marginTop: "50px" }}>
                 <Board board={board} onMove={this.handleBoardOnMove} />
-                <PlayerInfo player={player} gameover={gameover} />
+                <PlayerInfo player={turn} gameover={gameover} />
                 <GameoverDialog
                     open={showDialog}
                     isDraw={draw}
