@@ -14,45 +14,45 @@ import Logo from "../../../assets/img/tic_tac_toe-512.png";
 const useStyles = makeStyles(theme => ({
     toolbar: {
         display: "flex",
-        justifyContent: "space-between",
+        justifyContent: "space-between"
     },
     icon: {
-        marginRight: theme.spacing(2),
+        marginRight: theme.spacing(2)
     },
     heroContent: {
         backgroundColor: theme.palette.background.paper,
-        padding: theme.spacing(8, 0, 6),
+        padding: theme.spacing(8, 0, 6)
     },
     heroButtons: {
-        marginTop: theme.spacing(4),
+        marginTop: theme.spacing(4)
     },
     picture: {
-        marginTop: theme.spacing(4),
+        marginTop: theme.spacing(4)
     },
     textField: {
         marginLeft: theme.spacing(1),
         marginRight: theme.spacing(1),
-        width: 300,
+        width: 300
     },
     dense: {
-        marginTop: 19,
+        marginTop: 19
     },
     submit: {
         width: "300px",
-        marginTop: theme.spacing(2),
+        marginTop: theme.spacing(2)
     },
     orangeAvatar: {
         margin: 10,
         color: "#fff",
-        backgroundColor: deepOrange[500],
+        backgroundColor: deepOrange[500]
     },
     account: {
-        marginBottom: theme.spacing(2),
+        marginBottom: theme.spacing(2)
     },
     footer: {
         backgroundColor: theme.palette.background.paper,
-        padding: theme.spacing(6),
-    },
+        padding: theme.spacing(6)
+    }
 }));
 
 const Home = props => {
@@ -78,7 +78,9 @@ const Home = props => {
         const response = await createGame(formData);
         console.log("[CREATE_GAME_RESPONSE] ", response);
 
-        if (response.status === 200) {
+        if (!response || response.status !== 200) {
+            return Error();
+        } else {
             props.setGameId(response.data.gameId);
             props.history.push(`/play/${response.data.gameId}`);
         }
@@ -90,8 +92,11 @@ const Home = props => {
             formData.append("gameId", event.target.value);
 
             let response = await connectToGame(formData);
-            console.log("[response]", response);
-            if (response.status === 200) {
+
+            if (!response || response.status !== 200) {
+                return Error();
+            } else {
+                console.log("[response]", response);
                 props.history.push(`/play/${response.data.gameId}`);
             }
         }
@@ -99,13 +104,13 @@ const Home = props => {
 
     const createGame = async formData => {
         const headers = {
-            Authorization: localStorage.getItem("accessToken"),
+            Authorization: localStorage.getItem("accessToken")
         };
         let response = null;
 
         try {
             response = await Axios.post("/game", formData, {
-                headers: headers,
+                headers: headers
             });
         } catch (err) {
             return err.response;
@@ -116,12 +121,12 @@ const Home = props => {
 
     const connectToGame = async formData => {
         let headers = {
-            Authorization: localStorage.getItem("accessToken"),
+            Authorization: localStorage.getItem("accessToken")
         };
         let response = null;
         try {
             response = await Axios.post("/game/attach-player", formData, {
-                headers: headers,
+                headers: headers
             });
         } catch (err) {
             return err.response;
@@ -208,7 +213,7 @@ const Home = props => {
                                 type="number"
                                 className={classes.textField}
                                 InputLabelProps={{
-                                    shrink: true,
+                                    shrink: true
                                 }}
                                 margin="normal"
                                 variant="outlined"
@@ -229,7 +234,7 @@ const Home = props => {
                                 margin="dense"
                                 variant="outlined"
                             />
-{/*                             <TextField
+                            {/*                             <TextField
                                 id="outlined-dense"
                                 label="Whos Turn (1, 2)"
                                 className={clsx(

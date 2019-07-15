@@ -41,12 +41,11 @@ class Game extends Component {
         let response = await this.getGameById(this.gameId);
         let playerRessponse = await this.getPlayerNumber(this.gameId);
 
-        console.log("[PLAYER_NUMER]", playerRessponse.data);
-
-        if (response.status !== 200) {
-            return new Error(response.data);
+        if (!response || response.status !== 200 || !playerRessponse || playerRessponse !== 200)  {
+            return new Error();
         }
         console.log("[GAME_DID_MOUNT_GAMEID]", response.data);
+        console.log("[PLAYER_NUMER]", playerRessponse.data);
 
         const {
             matrixSize,
@@ -98,7 +97,7 @@ class Game extends Component {
         const headers = {
             Authorization: localStorage.getItem("accessToken")
         };
-        let response = null;
+        let response = null
 
         try {
             response = await Axios.get(`/game/${id}`, {
@@ -115,8 +114,7 @@ class Game extends Component {
         const headers = {
             Authorization: localStorage.getItem("accessToken")
         };
-        let response = null;
-
+        let response = null
         try {
             response = await Axios.get(`/game/player-number/${gameId}`, {
                 headers: headers

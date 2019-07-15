@@ -51,6 +51,11 @@ const SimpleTable = props => {
             const response = await Axios.get("/score", {
                 headers: headers,
             });
+
+            if (!response || response.status !== 200) {
+                return Error();
+            } 
+            
             setScores(response.data.scoreHistory);
             console.log("[SCORE_RESPONSE]", response);
         };
