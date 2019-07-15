@@ -41,7 +41,8 @@ class Game extends Component {
         let response = await this.getGameById(this.gameId);
         let playerRessponse = await this.getPlayerNumber(this.gameId);
 
-        if (!response || response.status !== 200 || !playerRessponse || playerRessponse !== 200)  {
+        if (!response || response.status !== 200 || !playerRessponse || playerRessponse.status !== 200)  {
+            console.log("Error")
             return new Error();
         }
         console.log("[GAME_DID_MOUNT_GAMEID]", response.data);
