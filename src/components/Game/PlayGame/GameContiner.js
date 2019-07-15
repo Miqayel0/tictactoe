@@ -53,7 +53,6 @@ class Game extends Component {
             firstPlayerTurn,
             secondPlayerTurn,
             moves,
-            value
         } = response.data;
         const { player } = playerRessponse.data;
         let playerValue = null;
