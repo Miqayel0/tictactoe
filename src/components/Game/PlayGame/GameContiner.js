@@ -17,16 +17,16 @@ class Game extends Component {
         board: [[]],
         gameover: false,
         winner: -1,
-        turn: null,
+        value: null,
         hasWinner: false,
         row: null,
         col: null,
-        currentPlayer: null,
+        player: null
     };
 
     get gameId() {
         const {
-            match: { params },
+            match: { params }
         } = this.props;
 
         return params.gameId || null;
@@ -39,6 +39,9 @@ class Game extends Component {
     componentDidMount = async () => {
         const hubToken = localStorage.getItem("hubToken");
         let response = await this.getGameById(this.gameId);
+        let playerRessponse = await this.getPlayerNumber(this.gameId);
+
+        console.log("[PLAYER_NUMER]", playerRessponse.data);
 
         if (response.status !== 200) {
             return new Error(response.data);
@@ -47,42 +50,33 @@ class Game extends Component {
 
         const {
             matrixSize,
-            firstPlayerId,
             firstPlayerTurn,
+            secondPlayerTurn,
             moves,
+            value
         } = response.data;
+        const { player } = playerRessponse.data;
+        let playerValue = null;
+
+        if(player === 1){
+            playerValue = firstPlayerTurn;
+        } else if (player === 2){
+            playerValue = secondPlayerTurn;
+        }
 
         let board = Array(matrixSize)
             .fill(0)
             .map(() => Array(matrixSize).fill(0));
 
-        let turn = null;
-        let currentPlayer = null;
-
-        if (this.userId === firstPlayerId) {
-            turn = firstPlayerTurn;
-            currentPlayer = 1;
-        } else {
-            currentPlayer = 2;
-            switch (firstPlayerTurn) {
-                case 1:
-                    turn = 2;
-                    break;
-                case 2:
-                    turn = 1;
-                    break;
-            }
-        }
-
-        moves.forEach(m => (board[m.row][m.column] = m.player));
+        moves.forEach(m => (board[m.row][m.col] = m.value));
 
         const hubConnection = new HubConnectionBuilder()
             .withUrl("https://localhost:5001/play", {
-                accessTokenFactory: () => hubToken,
+                accessTokenFactory: () => hubToken
             })
             .build();
 
-        this.setState({ hubConnection, board, turn, currentPlayer }, () => {
+        this.setState({ hubConnection, board, value: playerValue, player }, () => {
             this.state.hubConnection
                 .start()
                 .then(() =>
@@ -95,21 +89,21 @@ class Game extends Component {
                     )
                 );
 
-            this.state.hubConnection.on("sendToPlayer", (turn, row, col) => {
-                this.movePlayer(turn, row, col);
+            this.state.hubConnection.on("sendToPlayer", (value, row, col) => {
+                this.movePlayer(value, row, col);
             });
         });
     };
 
     getGameById = async id => {
         const headers = {
-            Authorization: localStorage.getItem("accessToken"),
+            Authorization: localStorage.getItem("accessToken")
         };
         let response = null;
 
         try {
             response = await Axios.get(`/game/${id}`, {
-                headers: headers,
+                headers: headers
             });
         } catch (err) {
             return err.response;
@@ -118,9 +112,26 @@ class Game extends Component {
         return response;
     };
 
-    notifyMove = (gameId, turn, row, col, currentPlayer) => {
+    getPlayerNumber = async gameId => {
+        const headers = {
+            Authorization: localStorage.getItem("accessToken")
+        };
+        let response = null;
+
+        try {
+            response = await Axios.get(`/game/player-number/${gameId}`, {
+                headers: headers
+            });
+        } catch (err) {
+            return err.response;
+        }
+
+        return response;
+    };
+
+    notifyMove = (gameId, value, row, col, player) => {
         this.state.hubConnection
-            .invoke("getMove", gameId, turn, row, col, currentPlayer)
+            .invoke("getMove", gameId, value, row, col, player)
             .catch(err => console.error(err));
     };
 
@@ -128,44 +139,44 @@ class Game extends Component {
         this.setState({ gameover: false });
     };
 
-    /*     switchPlayer = turn => {
-        this.setState({ turn });
+    /*     switchPlayer = value => {
+        this.setState({ value });
     }; */
 
     gameover = () => {
         this.setState({ gameover: true });
     };
 
-    winner = turn => {
-        this.setState({ winner: turn });
+    winner = value => {
+        this.setState({ winner: value });
     };
 
     /**
-     * When a turn plays a turn we need to mark that spot on the board.  We then need to
-     * switch to the next turn
-     * @param {number} turn The current turn
+     * When a value plays a value we need to mark that spot on the board.  We then need to
+     * switch to the next value
+     * @param {number} value The current value
      * @param {number} row The row on the board
      * @param {number} col The column on the board
      */
 
-    movePlayer = (turn, row, col) => {
-        console.log("[PLAYER]", turn);
+    movePlayer = (value, row, col) => {
+        console.log("[PLAYER]", value);
         const updatedBoard = [...this.state.board]; // cloning board
-        updatedBoard[row][col] = turn;
+        updatedBoard[row][col] = value;
 
         this.setState({ board: updatedBoard });
     };
 
-    checkWinner = (board, turn) => {
-        // the logic to check if a turn has won or the game ended in a draw are in
+    checkWinner = (board, value) => {
+        // the logic to check if a value has won or the game ended in a draw are in
         // the utils/game.js file.
 
         // instead of returning a promise like we would if we were making an api call
         // from our operations, we just return a boolean for the game winner
         let hasWinner = true;
 
-        if (isWinner(board, turn)) {
-            this.winner(turn);
+        if (isWinner(board, value)) {
+            this.winner(value);
             this.gameover();
         } else if (isDraw(board)) {
             this.winner(0);
@@ -177,10 +188,10 @@ class Game extends Component {
         this.setState({ hasWinner });
     };
 
-    /*     playTurn = (turn, row, col) => {
+    /*     playTurn = (value, row, col) => {
         let nextPlayer;
 
-        switch (turn) {
+        switch (value) {
             case 1:
                 nextPlayer = 2;
                 break;
@@ -192,23 +203,23 @@ class Game extends Component {
                 break;
         }
 
-        this.movePlayer(turn, row, col);
+        this.movePlayer(value, row, col);
         this.switchPlayer(nextPlayer);
     }; */
 
     handleBoardOnMove = square => {
-        // when a square is clicked we want to mark that square for the current turn
+        // when a square is clicked we want to mark that square for the current value
 
-        const { board, turn, gameover, currentPlayer } = this.state;
+        const { board, value, gameover, player } = this.state;
         const { row, col } = square;
         // only mark if the game is still in progress and the square is empty (none)
         // otherwise, ignore the play
         if (gameover || board[row][col] !== 0) {
             return;
         }
-        // make a play for the turn
-        this.movePlayer(turn, row, col);
-        this.notifyMove(this.gameId, turn, row, col, currentPlayer);
+        // make a play for the value
+        this.movePlayer(value, row, col);
+        this.notifyMove(this.gameId, value, row, col, player);
 
         // then check for the winner
 
@@ -218,7 +229,7 @@ class Game extends Component {
     };
 
     handleDialogClick = answer => {
-        // we only want to start a new game if the turn clicks 'yes'
+        // we only want to start a new game if the value clicks 'yes'
         if (answer) {
             this.newGame();
         }
@@ -233,7 +244,7 @@ class Game extends Component {
     };
 
     render() {
-        const { showDialog, board, turn, gameover, winner } = this.state;
+        const { showDialog, board, value, gameover, winner } = this.state;
         const draw = winner === 0;
 
         return (
@@ -243,7 +254,7 @@ class Game extends Component {
             // https://material-ui-next.com/layout/grid/
             <div style={{ marginTop: "50px" }}>
                 <Board board={board} onMove={this.handleBoardOnMove} />
-                <PlayerInfo player={turn} gameover={gameover} />
+                <PlayerInfo player={value} gameover={gameover} />
                 <GameoverDialog
                     open={showDialog}
                     isDraw={draw}
