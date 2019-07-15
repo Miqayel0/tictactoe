@@ -2,10 +2,26 @@ import React, { Component } from "react";
 import { HubConnectionBuilder } from "@aspnet/signalr";
 import { withRouter } from "react-router";
 import Axios from "../../../Axios";
+import Typography from "@material-ui/core/Typography";
+import { withStyles } from "@material-ui/core/styles";
 import Board from "./components/Board.js";
 import PlayerInfo from "./components/PlayerInfo.js";
 import GameoverDialog from "./components/GameoverDialog.js";
+import { CopyToClipboard } from "react-copy-to-clipboard";
 import { isDraw, isWinner } from "./utils/util";
+
+const styles = theme => ({
+    Typo: {
+        marginTop: theme.spacing(3),
+        display: "inline",
+    },
+    Div: {
+        margin: theme.spacing(2),
+    },
+    matg: {
+        marginTop: theme.spacing(2),
+    },
+});
 
 class Game extends Component {
     state = {
@@ -21,12 +37,12 @@ class Game extends Component {
         hasWinner: false,
         row: null,
         col: null,
-        player: null
+        player: null,
     };
 
     get gameId() {
         const {
-            match: { params }
+            match: { params },
         } = this.props;
 
         return params.gameId || null;
@@ -41,8 +57,13 @@ class Game extends Component {
         let response = await this.getGameById(this.gameId);
         let playerRessponse = await this.getPlayerNumber(this.gameId);
 
-        if (!response || response.status !== 200 || !playerRessponse || playerRessponse.status !== 200)  {
-            console.log("Error")
+        if (
+            !response ||
+            response.status !== 200 ||
+            !playerRessponse ||
+            playerRessponse.status !== 200
+        ) {
+            console.log("Error");
             return new Error();
         }
         console.log("[GAME_ID]", response.data);
@@ -57,9 +78,9 @@ class Game extends Component {
         const { player } = playerRessponse.data;
         let playerValue = null;
 
-        if(player === 1){
+        if (player === 1) {
             playerValue = firstPlayerTurn;
-        } else if (player === 2){
+        } else if (player === 2) {
             playerValue = secondPlayerTurn;
         }
 
@@ -71,38 +92,44 @@ class Game extends Component {
 
         const hubConnection = new HubConnectionBuilder()
             .withUrl("https://localhost:5001/play", {
-                accessTokenFactory: () => hubToken
+                accessTokenFactory: () => hubToken,
             })
             .build();
 
-        this.setState({ hubConnection, board, value: playerValue, player }, () => {
-            this.state.hubConnection
-                .start()
-                .then(() =>
-                    console.log("[SOCKET_CONNECTION] Connection started!")
-                )
-                .catch(err =>
-                    console.log(
-                        "[SOCKET_CONNECTION] Error while establishing connection :( ",
-                        err
+        this.setState(
+            { hubConnection, board, value: playerValue, player },
+            () => {
+                this.state.hubConnection
+                    .start()
+                    .then(() =>
+                        console.log("[SOCKET_CONNECTION] Connection started!")
                     )
-                );
+                    .catch(err =>
+                        console.log(
+                            "[SOCKET_CONNECTION] Error while establishing connection :( ",
+                            err
+                        )
+                    );
 
-            this.state.hubConnection.on("sendToPlayer", (value, row, col) => {
-                this.movePlayer(value, row, col);
-            });
-        });
+                this.state.hubConnection.on(
+                    "sendToPlayer",
+                    (value, row, col) => {
+                        this.movePlayer(value, row, col);
+                    }
+                );
+            }
+        );
     };
 
     getGameById = async id => {
         const headers = {
-            Authorization: localStorage.getItem("accessToken")
+            Authorization: localStorage.getItem("accessToken"),
         };
-        let response = null
+        let response = null;
 
         try {
             response = await Axios.get(`/game/${id}`, {
-                headers: headers
+                headers: headers,
             });
         } catch (err) {
             return err.response;
@@ -113,12 +140,12 @@ class Game extends Component {
 
     getPlayerNumber = async gameId => {
         const headers = {
-            Authorization: localStorage.getItem("accessToken")
+            Authorization: localStorage.getItem("accessToken"),
         };
-        let response = null
+        let response = null;
         try {
             response = await Axios.get(`/game/player-number/${gameId}`, {
-                headers: headers
+                headers: headers,
             });
         } catch (err) {
             return err.response;
@@ -136,10 +163,6 @@ class Game extends Component {
     newGame = () => {
         this.setState({ gameover: false });
     };
-
-    /*     switchPlayer = value => {
-        this.setState({ value });
-    }; */
 
     gameover = () => {
         this.setState({ gameover: true });
@@ -186,25 +209,6 @@ class Game extends Component {
         this.setState({ hasWinner });
     };
 
-    /*     playTurn = (value, row, col) => {
-        let nextPlayer;
-
-        switch (value) {
-            case 1:
-                nextPlayer = 2;
-                break;
-            case 2:
-                nextPlayer = 1;
-                break;
-            default:
-                // throw error?
-                break;
-        }
-
-        this.movePlayer(value, row, col);
-        this.switchPlayer(nextPlayer);
-    }; */
-
     handleBoardOnMove = square => {
         // when a square is clicked we want to mark that square for the current value
 
@@ -242,7 +246,8 @@ class Game extends Component {
     };
 
     render() {
-        const { showDialog, board, value, gameover, winner } = this.state;
+        const { showDialog, board, player, gameover, winner } = this.state;
+        const { classes } = this.props;
         const draw = winner === 0;
 
         return (
@@ -250,9 +255,23 @@ class Game extends Component {
             // at small (sm+) and above we want 2 columns
             // Grid 'item' in a container must have columns (xs, sm, md, etc.) that add up to 12, per grid docs:
             // https://material-ui-next.com/layout/grid/
-            <div style={{ marginTop: "50px" }}>
+            <div className={classes.Typo}>
+                <CopyToClipboard text={this.gameId}>
+                    <Typography className={classes.Div} variant="h6">
+                        Game ID {this.gameId}
+                        {"  "}
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                        >
+                            <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
+                        </svg>
+                    </Typography>
+                </CopyToClipboard>
                 <Board board={board} onMove={this.handleBoardOnMove} />
-                <PlayerInfo player={value} gameover={gameover} />
+                <PlayerInfo player={player} gameover={gameover} />
                 <GameoverDialog
                     open={showDialog}
                     isDraw={draw}
@@ -264,4 +283,4 @@ class Game extends Component {
         );
     }
 }
-export default withRouter(Game);
+export default withRouter(withStyles(styles)(Game));

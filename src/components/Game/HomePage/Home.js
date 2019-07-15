@@ -61,7 +61,6 @@ const Home = props => {
     const [createClicked, setCreateClicked] = useState(false);
     const [matrixSize, setMatrixSize] = useState(0);
     const [firstPlayerTurn, setFirstPlayerTurn] = useState(0);
-    // const [whosTurn, setWhosTurn] = useState("");
 
     const inputChangedHandler = (event, callBack) => {
         callBack(event.target.value);
@@ -234,19 +233,6 @@ const Home = props => {
                                 margin="dense"
                                 variant="outlined"
                             />
-                            {/*                             <TextField
-                                id="outlined-dense"
-                                label="Whos Turn (1, 2)"
-                                className={clsx(
-                                    classes.textField,
-                                    classes.dense
-                                )}
-                                onChange={event =>
-                                    inputChangedHandler(event, setWhosTurn)
-                                }
-                                margin="dense"
-                                variant="outlined"
-                            /> */}
                             <Button
                                 type="submit"
                                 fullWidth
