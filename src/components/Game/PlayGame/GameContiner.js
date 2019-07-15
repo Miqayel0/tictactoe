@@ -45,7 +45,7 @@ class Game extends Component {
             console.log("Error")
             return new Error();
         }
-        console.log("[GAME_DID_MOUNT_GAMEID]", response.data);
+        console.log("[GAME_ID]", response.data);
         console.log("[PLAYER_NUMER]", playerRessponse.data);
 
         const {

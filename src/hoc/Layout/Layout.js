@@ -101,7 +101,9 @@ const Layout = props => {
         formData.append("email", email);
 
         let response = await updateUser(formData);
-        if (response.status === 200) {
+        if (!response || response.status !== 200) {
+            return Error();
+        } else {
             setPlayerFullName(response.data.fullName);
             setFullNameShorthand(response.data.fullNameShorthand);
         }
