@@ -38,6 +38,8 @@ class Game extends Component {
         row: null,
         col: null,
         player: null,
+        allowMove: true,
+        errMessage: "",
     };
 
     get gameId() {
@@ -115,6 +117,7 @@ class Game extends Component {
                     "sendToPlayer",
                     (value, row, col) => {
                         this.movePlayer(value, row, col);
+                        this.setState({ allowMove: true, errMessage: "" });
                     }
                 );
             }
@@ -185,7 +188,7 @@ class Game extends Component {
         const updatedBoard = [...this.state.board]; // cloning board
         updatedBoard[row][col] = value;
 
-        this.setState({ board: updatedBoard });
+        this.setState({ board: updatedBoard, allowMove: false });
     };
 
     checkWinner = (board, value) => {
@@ -212,10 +215,15 @@ class Game extends Component {
     handleBoardOnMove = square => {
         // when a square is clicked we want to mark that square for the current value
 
-        const { board, value, gameover, player } = this.state;
+        const { board, value, gameover, player, allowMove } = this.state;
         const { row, col } = square;
         // only mark if the game is still in progress and the square is empty (none)
         // otherwise, ignore the play
+        if (allowMove === false) {
+            this.setState({ errMessage: "Not your turn" });
+            return;
+        }
+
         if (gameover || board[row][col] !== 0) {
             return;
         }
@@ -246,7 +254,14 @@ class Game extends Component {
     };
 
     render() {
-        const { showDialog, board, player, gameover, winner } = this.state;
+        const {
+            showDialog,
+            board,
+            player,
+            gameover,
+            winner,
+            errMessage,
+        } = this.state;
         const { classes } = this.props;
         const draw = winner === 0;
 
@@ -256,6 +271,15 @@ class Game extends Component {
             // Grid 'item' in a container must have columns (xs, sm, md, etc.) that add up to 12, per grid docs:
             // https://material-ui-next.com/layout/grid/
             <div className={classes.Typo}>
+                {errMessage && (
+                    <Typography
+                        className={classes.Div}
+                        color={"error"}
+                        variant="h6"
+                    >
+                        {errMessage}
+                    </Typography>
+                )}
                 <CopyToClipboard text={this.gameId}>
                     <Typography className={classes.Div} variant="h6">
                         Game ID {this.gameId}
