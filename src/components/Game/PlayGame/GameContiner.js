@@ -38,7 +38,7 @@ class Game extends Component {
         row: null,
         col: null,
         player: null,
-        allowMove: true,
+        allowMove: false,
         errMessage: "",
     };
 
@@ -56,6 +56,9 @@ class Game extends Component {
 
     componentDidMount = async () => {
         const hubToken = localStorage.getItem("hubToken");
+        let playerValue = null;
+        let allowMove = false;
+        let errMessage = "NOT YOUR TURN!!!";
         let response = await this.getGameById(this.gameId);
         let playerRessponse = await this.getPlayerNumber(this.gameId);
 
@@ -76,15 +79,22 @@ class Game extends Component {
             firstPlayerTurn,
             secondPlayerTurn,
             moves,
+            currentTurn,
         } = response.data;
         const { player } = playerRessponse.data;
-        let playerValue = null;
+
 
         if (player === 1) {
             playerValue = firstPlayerTurn;
         } else if (player === 2) {
             playerValue = secondPlayerTurn;
         }
+
+        if(currentTurn === player){
+            allowMove = true;
+            errMessage = "";
+        }
+
 
         let board = Array(matrixSize)
             .fill(0)
@@ -99,7 +109,7 @@ class Game extends Component {
             .build();
 
         this.setState(
-            { hubConnection, board, value: playerValue, player },
+            { hubConnection, board, value: playerValue, player, allowMove, errMessage },
             () => {
                 this.state.hubConnection
                     .start()
@@ -115,9 +125,9 @@ class Game extends Component {
 
                 this.state.hubConnection.on(
                     "sendToPlayer",
-                    (value, row, col) => {
+                    (value, row, col, currentPlayer) => {
                         this.movePlayer(value, row, col);
-                        this.setState({ allowMove: true, errMessage: "" });
+                        this.setState({ allowMove: true, errMessage: "", currentPlayer });
                     }
                 );
             }
@@ -157,9 +167,9 @@ class Game extends Component {
         return response;
     };
 
-    notifyMove = (gameId, value, row, col, player) => {
+    notifyMove = (gameId, value, row, col) => {
         this.state.hubConnection
-            .invoke("getMove", gameId, value, row, col, player)
+            .invoke("getMove", gameId, value, row, col)
             .catch(err => console.error(err));
     };
 
@@ -176,9 +186,9 @@ class Game extends Component {
     };
 
     /**
-     * When a value plays a value we need to mark that spot on the board.  We then need to
+     * When a value plays a value we need to mark that spot on the board.  We then need to```
      * switch to the next value
-     * @param {number} value The current value
+     * @param {number} value The current value```
      * @param {number} row The row on the board
      * @param {number} col The column on the board
      */
@@ -188,7 +198,7 @@ class Game extends Component {
         const updatedBoard = [...this.state.board]; // cloning board
         updatedBoard[row][col] = value;
 
-        this.setState({ board: updatedBoard, allowMove: false });
+        this.setState({ board: updatedBoard, allowMove: false, errMessage: "NOT YOUR TURN!!!" });
     };
 
     checkWinner = (board, value) => {
@@ -215,12 +225,12 @@ class Game extends Component {
     handleBoardOnMove = square => {
         // when a square is clicked we want to mark that square for the current value
 
-        const { board, value, gameover, player, allowMove } = this.state;
+        const { board, value, gameover, allowMove, errMessage } = this.state;
         const { row, col } = square;
         // only mark if the game is still in progress and the square is empty (none)
         // otherwise, ignore the play
         if (allowMove === false) {
-            this.setState({ errMessage: "Not your turn" });
+            errMessage || this.setState({ errMessage: "NOT YOUR TURN!!!" });
             return;
         }
 
@@ -229,7 +239,7 @@ class Game extends Component {
         }
         // make a play for the value
         this.movePlayer(value, row, col);
-        this.notifyMove(this.gameId, value, row, col, player);
+        this.notifyMove(this.gameId, value, row, col);
 
         // then check for the winner
 
@@ -269,7 +279,7 @@ class Game extends Component {
             // at extra-small (xs) size the grid show have two rows
             // at small (sm+) and above we want 2 columns
             // Grid 'item' in a container must have columns (xs, sm, md, etc.) that add up to 12, per grid docs:
-            // https://material-ui-next.com/layout/grid/
+            // https://material-ui-next.com/laYOUR/grid/
             <div className={classes.Typo}>
                 {errMessage && (
                     <Typography
